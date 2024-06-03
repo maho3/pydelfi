@@ -18,6 +18,7 @@ class Delfi():
     def __init__(self, data, prior, nde, \
                  Finv = None, theta_fiducial = None, param_limits = None, param_names = None, nwalkers = 100, \
                  posterior_chain_length = 1000, proposal_chain_length = 100, \
+                 n_threads = 2,  # set number of threads to be used by Tensorflow
                  rank = 0, n_procs = 1, comm = None, red_op = None, \
                  show_plot = True, results_dir = "", progress_bar = True, input_normalization = None,
                  graph_restore_filename = "graph_checkpoint", restore_filename = "restore.pkl", restore = False, save = True):
@@ -65,7 +66,11 @@ class Delfi():
         self.stacking_weights = np.zeros(self.n_ndes)
 
         # Tensorflow session for the NDE training
-        self.sess = tf.Session(config = tf.ConfigProto())
+        cfg = tf.ConfigProto(
+            inter_op_parallelism_threads=n_threads,
+            intra_op_parallelism_threads=n_threads
+        )
+        self.sess = tf.Session(config = cfg)
         self.sess.run(tf.global_variables_initializer())
         
         # Parameter limits
